@@ -1,19 +1,25 @@
-
 import React from 'react';
 import { RouterProvider, useRouter } from './lib/routerContext';
 import RootLayout from './app/layout';
 
-// Pages
+// Core Pages
 import HomePage from './app/page';
 import QuickStartPage from './app/quick-start/page';
+
+// Modules
 import ModulesPage from './app/modules/page';
 import ModulesFundamentalsPage from './app/modules/fundamentals/page';
 import ModulesPromptingPage from './app/modules/prompting/page';
 import ModulesWorkflowPage from './app/modules/workflow/page';
 import ModulesResponsibleUsePage from './app/modules/responsible-use/page';
-// NEW: Import the Hub Page
-import ModulesToolsOverviewPage from './app/modules/tools-overview/page';
 
+// AI Tools Modules (hub + deep dives)
+import ModulesToolsOverviewPage from './app/modules/tools-overview/page';
+import ModulesToolsResearchPage from './app/modules/tool-research/page';
+import ModulesToolsDocumentsPage from './app/modules/tool-documents/page';
+import ModulesToolsBuilderPage from './app/modules/tool-builder/page';
+
+// Reference & other tools
 import ReferencePage from './app/reference/page';
 import PolicyQuickViewPage from './app/reference/policy-quick-view/page';
 import ReferencePromptingGuidePage from './app/reference/prompting-guide/page';
@@ -23,31 +29,36 @@ import AdvancedPage from './app/advanced/page';
 const RouteHandler = () => {
   const { path } = useRouter();
 
-  // Simple exact match router
-  if (path === '/') return <HomePage />;
-  if (path === '/quick-start') return <QuickStartPage />;
-  
-  // Modules
-  if (path === '/modules') return <ModulesPage />;
-  if (path === '/modules/fundamentals') return <ModulesFundamentalsPage />;
-  if (path === '/modules/prompting') return <ModulesPromptingPage />;
-  if (path === '/modules/workflow') return <ModulesWorkflowPage />;
-  if (path === '/modules/responsible-use') return <ModulesResponsibleUsePage />;
-  
-  // NEW: Route for Tools Overview
-  if (path === '/modules/tools-overview') return <ModulesToolsOverviewPage />;
-  
-  // Fallback for demo: any other module goes to main list
-  if (path.startsWith('/modules/')) return <ModulesPage />; 
-  
-  // Reference
-  if (path === '/reference') return <ReferencePage />;
-  if (path === '/reference/policy-quick-view') return <PolicyQuickViewPage />;
-  if (path === '/reference/prompting-guide') return <ReferencePromptingGuidePage />;
-  
-  if (path === '/playground') return <PlaygroundPage />;
-  if (path === '/advanced') return <AdvancedPage />;
+  // Strip off any hash or query, just in case
+  const cleanPath = path.split('#')[0].split('?')[0];
 
+  // Top-level pages
+  if (cleanPath === '/') return <HomePage />;
+  if (cleanPath === '/quick-start') return <QuickStartPage />;
+
+  // Core learning modules
+  if (cleanPath === '/modules') return <ModulesPage />;
+  if (cleanPath === '/modules/fundamentals') return <ModulesFundamentalsPage />;
+  if (cleanPath === '/modules/prompting') return <ModulesPromptingPage />;
+  if (cleanPath === '/modules/workflow') return <ModulesWorkflowPage />;
+  if (cleanPath === '/modules/responsible-use') return <ModulesResponsibleUsePage />;
+
+  // AI Tools & Research: hub + deep dives
+  if (cleanPath === '/modules/tools-overview') return <ModulesToolsOverviewPage />;
+  if (cleanPath === '/modules/tool-research') return <ModulesToolsResearchPage />;
+  if (cleanPath === '/modules/tool-documents') return <ModulesToolsDocumentsPage />;
+  if (cleanPath === '/modules/tool-builder') return <ModulesToolsBuilderPage />;
+
+  // Reference section
+  if (cleanPath === '/reference') return <ReferencePage />;
+  if (cleanPath === '/reference/policy-quick-view') return <PolicyQuickViewPage />;
+  if (cleanPath === '/reference/prompting-guide') return <ReferencePromptingGuidePage />;
+
+  // Playground & advanced tools
+  if (cleanPath === '/playground') return <PlaygroundPage />;
+  if (cleanPath === '/advanced') return <AdvancedPage />;
+
+  // Fallback – if nothing matched, send them home
   return <HomePage />;
 };
 
