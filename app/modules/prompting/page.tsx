@@ -1,20 +1,17 @@
 import React, { useState } from 'react';
 import { ModuleLayout } from '../../../components/ModuleLayout';
 import { Card, Callout, PromptCard, Button } from '../../../components/ui';
-import { CheckCircle2, XCircle, ChevronRight, Zap, ArrowLeft, ArrowRight } from 'lucide-react';
+import { CheckCircle2, ArrowRight, ArrowLeft, Target, ListChecks, Repeat, GitBranch, Lightbulb, Zap, User, FileText } from 'lucide-react';
 
 export default function Page() {
-  const [quizAnswer, setQuizAnswer] = useState<number | null>(null);
-  const [showExplanation, setShowExplanation] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
 
   const sections = [
-    { id: 'intro', title: 'Why Prompting Matters' },
-    { id: 'framework', title: 'The Framework (C.T.F.)' },
-    { id: 'examples', title: 'Business Examples' },
-    { id: 'tips', title: 'Power Tips' },
-    { id: 'troubleshooting', title: 'Troubleshooting' },
-    { id: 'quiz', title: 'Knowledge Check' },
+    { id: 'mindset-shift', title: 'The Mindset Shift' },
+    { id: 'task-and-context', title: 'Task + Context' },
+    { id: 'requirements-and-format', title: 'Requirements & Output Shape' },
+    { id: 'examples-and-iteration', title: 'Examples, Iteration, and Branching' },
+    { id: 'full-prompt', title: 'Putting It All Together' },
   ];
 
   const totalSteps = sections.length;
@@ -29,220 +26,266 @@ export default function Page() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const sectionContent = [
-    // SECTION 1: INTRO
-    (
-      <section key="intro" id="intro" className="mb-12 animate-fade-in">
-        <h2>Garbage In, Garbage Out</h2>
-        <p>
-          Imagine you have a brilliant intern who has read every business textbook in the world but has 
-          <strong> zero context</strong> about your specific day. If you walk by their desk and shout 
-          "Write the email!", they will stare at you blankly—or worse, write a generic email that makes no sense.
-        </p>
-        <p>
-          AI works the same way. It isn't a mind reader. The quality of the output is determined entirely 
-          by the quality of your instructions (the "Prompt").
-        </p>
-        <Callout variant="info" title="The Golden Rule">
-          Treat the AI like a smart, junior employee. Be specific, give context, and tell it exactly what good looks like.
-        </Callout>
-      </section>
-    ),
-
-    // SECTION 2: FRAMEWORK
-    (
-      <section key="framework" id="framework" className="mb-12 animate-fade-in">
-        <h2>The Framework: C.T.F.</h2>
-        <p>
-          You don't need to be a coder to write good prompts. You just need to cover these three bases.
-          If your prompt is failing, check if you are missing one of these.
-        </p>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 my-8 not-prose">
-          <Card className="p-6 border-t-4 border-t-blue-500 bg-blue-50/50">
-            <h3 className="text-xl font-bold text-blue-900 mb-2">1. Context</h3>
-            <p className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3">"Set the Stage"</p>
-            <p className="text-slate-700">
-              Who is the AI acting as? What is the background info?
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 0:
+        return (
+          <section id="mindset-shift" className="mb-12 animate-fade-in">
+            <h2>Talk to AI like a smart intern, not a magic oracle</h2>
+            <p className="text-lg text-slate-700">
+              The latest models (Gemini, ChatGPT, Claude) are incredible at inferring what you want, but they can’t read your mind.
+              You don’t need "magic prompt phrases" or complex coding skills to get great results. You just need to think clearly about what you’re asking.
             </p>
-            <p className="mt-4 text-sm text-slate-600 italic">"Act as a Project Manager reviewing a budget overrun..."</p>
-          </Card>
-
-          <Card className="p-6 border-t-4 border-t-purple-500 bg-purple-50/50">
-            <h3 className="text-xl font-bold text-purple-900 mb-2">2. Task</h3>
-            <p className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3">"Define the Action"</p>
-            <p className="text-slate-700">
-              What specific job do you want done? Use active verbs.
-            </p>
-            <p className="mt-4 text-sm text-slate-600 italic">"Draft a rejection email based on Contract Clause 4.a..."</p>
-          </Card>
-
-          <Card className="p-6 border-t-4 border-t-emerald-500 bg-emerald-50/50">
-            <h3 className="text-xl font-bold text-emerald-900 mb-2">3. Format</h3>
-            <p className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3">"Specify Output"</p>
-            <p className="text-slate-700">
-              How do you want the answer to look? Tone? Length?
-            </p>
-            <p className="mt-4 text-sm text-slate-600 italic">"Use a professional tone. Keep it under 200 words."</p>
-          </Card>
-        </div>
-      </section>
-    ),
-
-    // SECTION 3: EXAMPLES
-    (
-      <section key="examples" id="examples" className="mb-12 animate-fade-in">
-        <h2>Business Examples: Before & After</h2>
-        <p>See the difference when you apply the C.T.F. framework.</p>
-
-        <div className="space-y-8 not-prose">
-          {/* Example 1 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-4 bg-red-50 rounded-lg border border-red-100">
-              <div className="flex items-center gap-2 mb-2">
-                <XCircle className="w-5 h-5 text-red-600" />
-                <span className="font-bold text-red-800">The "Lazy" Prompt</span>
-              </div>
-              <p className="font-mono text-sm text-slate-700">"Summarize this file."</p>
-              <div className="mt-4 text-xs text-red-600">
-                <strong>Result:</strong> A generic summary that might miss the key dates or financial figures you actually care about.
-              </div>
-            </div>
-
-            <div className="p-4 bg-green-50 rounded-lg border border-green-100">
-              <div className="flex items-center gap-2 mb-2">
-                <CheckCircle2 className="w-5 h-5 text-green-600" />
-                <span className="font-bold text-green-800">The "Pro" Prompt</span>
-              </div>
-              <p className="font-mono text-sm text-slate-700">
-                "Act as a Project Manager. <span className="text-blue-600 font-bold">[Context]</span> 
-                Summarize these meeting notes. <span className="text-purple-600 font-bold">[Task]</span> 
-                Focus specifically on the timeline slippage and the budget impact. Format as a bulleted list. <span className="text-emerald-600 font-bold">[Format]</span>"
+            
+            <div className="my-8">
+              <h3 className="text-xl font-bold text-slate-900 mb-4">What this module is really teaching</h3>
+              <p className="text-slate-600 mb-4">
+                You’ll learn a lightweight pattern for prompts that works across every tool.
+                The goal is fewer "meh" answers and more "wow, I would actually use this at work" outputs.
               </p>
-            </div>
-          </div>
-        </div>
-      </section>
-    ),
-
-    // SECTION 4: POWER TIPS
-    (
-      <section key="tips" id="tips" className="mb-12 animate-fade-in">
-        <h2>3 Power Tips</h2>
-        
-        <h3>1. Assign a Role (Persona)</h3>
-        <p>
-          Tell the AI who to be. If you want a simple explanation, ask it to be a "Teacher". 
-          If you want a strict review, ask it to be a "Compliance Officer".
-        </p>
-
-        <h3>2. Set Constraints</h3>
-        <p>
-          The AI tends to be verbose. Constrain it to get better results.
-        </p>
-        <ul className="list-disc pl-5 space-y-2">
-            <li>"Do not use jargon."</li>
-            <li>"Keep it under 3 sentences."</li>
-            <li>"Use 8th-grade reading level."</li>
-        </ul>
-
-        <h3>3. Give Examples (Few-Shot Prompting)</h3>
-        <p>
-          The best way to show the AI what you want is to give it an example.
-        </p>
-        <div className="bg-slate-100 p-4 rounded-lg font-mono text-sm text-slate-700 my-4">
-          <p className="text-slate-500">// Example of providing a pattern</p>
-          <p className="mb-2">Task: Extract names and roles.</p>
-          <p className="mb-1">Input: "John Smith, the lead engineer, called Jane Doe, the client."</p>
-          <p className="mb-3">Output: John Smith (Engineer), Jane Doe (Client)</p>
-          <p className="mb-1">Input: "Dr. A. Miller sent the report to supervisor Bob Jones."</p>
-          <p className="mb-1">Output:</p>
-        </div>
-      </section>
-    ),
-
-    // SECTION 5: TROUBLESHOOTING
-    (
-      <section key="troubleshooting" id="troubleshooting" className="mb-12 animate-fade-in">
-        <h2>Troubleshooting: "It didn't work!"</h2>
-        <p>
-          Sometimes the AI gives a bad answer. Don't give up! Try these fixes:
-        </p>
-        <ul>
-          <li><strong>Clarify the Context:</strong> Did you assume the AI knew something it didn't?</li>
-          <li><strong>Break it Down:</strong> If the task is complex, ask the AI to "Think step-by-step".</li>
-          <li><strong>Iterate:</strong> Treat it like a conversation. "That was too formal. Rewrite it to be friendlier."</li>
-        </ul>
-      </section>
-    ),
-
-    // SECTION 6: QUIZ
-    (
-      <section key="quiz" id="quiz" className="mb-12 pt-8 border-t border-slate-200 animate-fade-in">
-        <h2 className="flex items-center gap-3">
-          <Zap className="text-yellow-500 fill-yellow-500" /> 
-          Knowledge Check
-        </h2>
-        <p className="mb-6">Select the prompt that follows the C.T.F. framework best.</p>
-
-        <Card className="p-6 bg-slate-50 not-prose">
-          <h3 className="font-bold text-lg mb-4">Scenario: You need to explain a price increase to a client.</h3>
-          
-          <div className="space-y-3">
-            <button
-              onClick={() => { setQuizAnswer(1); setShowExplanation(true); }}
-              className={`w-full text-left p-4 rounded border-2 transition-all ${
-                quizAnswer === 1 
-                  ? 'border-red-500 bg-red-50' 
-                  : 'border-slate-200 bg-white hover:border-blue-300'
-              }`}
-            >
-              <div className="font-mono text-sm">"Write an email explaining the price increase."</div>
-            </button>
-
-            <button
-              onClick={() => { setQuizAnswer(2); setShowExplanation(true); }}
-              className={`w-full text-left p-4 rounded border-2 transition-all ${
-                quizAnswer === 2 
-                  ? 'border-green-500 bg-green-50' 
-                  : 'border-slate-200 bg-white hover:border-blue-300'
-              }`}
-            >
-              <div className="font-mono text-sm">
-                "Act as a Sales Director. Write a brief email to a long-term client explaining that the 10% price increase is due to rising supply chain costs. Tone should be partnership-focused, not defensive."
+              
+              <div className="bg-slate-50 p-6 rounded-xl border border-slate-200">
+                <ul className="space-y-3">
+                  <li className="flex gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-blue-600 mt-0.5 shrink-0" />
+                    <span className="text-slate-700">Turn vague asks into clear tasks.</span>
+                  </li>
+                  <li className="flex gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-blue-600 mt-0.5 shrink-0" />
+                    <span className="text-slate-700">Give the model enough context to be useful.</span>
+                  </li>
+                  <li className="flex gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-blue-600 mt-0.5 shrink-0" />
+                    <span className="text-slate-700">Be explicit about what "good" looks like.</span>
+                  </li>
+                  <li className="flex gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-blue-600 mt-0.5 shrink-0" />
+                    <span className="text-slate-700">Treat each answer as a draft, not a verdict.</span>
+                  </li>
+                </ul>
               </div>
-            </button>
-          </div>
-
-          {showExplanation && (
-            <div className="mt-6 animate-fade-in">
-              {quizAnswer === 2 ? (
-                <div className="bg-green-100 text-green-800 p-4 rounded-lg flex gap-3">
-                  <CheckCircle2 className="w-6 h-6 shrink-0" />
-                  <div>
-                    <p className="font-bold">Correct!</p>
-                    <p className="text-sm mt-1">
-                      You provided Context (Sales Director), the Task (explain 10% increase), and Format/Tone (brief, partnership-focused).
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                <div className="bg-red-100 text-red-800 p-4 rounded-lg flex gap-3">
-                  <XCircle className="w-6 h-6 shrink-0" />
-                  <div>
-                    <p className="font-bold">Not quite.</p>
-                    <p className="text-sm mt-1">
-                      The first prompt is too vague. The AI will make up a reason for the increase (Hallucination) and might sound too robotic.
-                    </p>
-                  </div>
-                </div>
-              )}
             </div>
-          )}
-        </Card>
-      </section>
-    )
-  ];
+          </section>
+        );
+      case 1:
+        return (
+          <section id="task-and-context" className="mb-12 animate-fade-in">
+            <h2>Step 1: Give it a job and a world to live in</h2>
+            <p className="mb-6">
+              This is the foundation. We call it <strong>T + C</strong> (Task + Context).
+            </p>
+            <ul className="list-disc pl-5 space-y-2 mb-8 text-slate-700">
+              <li><strong>Task:</strong> What specific job do you want the AI to do?</li>
+              <li><strong>Context:</strong> What background info does it need to do that job well?</li>
+            </ul>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 not-prose">
+              <Card className="p-6 border-l-4 border-l-slate-300 bg-slate-50">
+                <div className="flex items-center gap-2 mb-4 text-slate-500 font-bold uppercase text-xs tracking-wider">
+                  <span className="text-lg">😕</span> Weak Prompt
+                </div>
+                <p className="font-mono text-sm text-slate-600 italic">
+                  "Write a marketing email."
+                </p>
+                <p className="text-xs text-slate-500 mt-4">
+                  Result: Generic fluff. The AI has to guess the product, audience, and goal.
+                </p>
+              </Card>
+
+              <Card className="p-6 border-l-4 border-l-blue-500 bg-white shadow-md">
+                <div className="flex items-center gap-2 mb-4 text-blue-600 font-bold uppercase text-xs tracking-wider">
+                  <span className="text-lg">🚀</span> Stronger Prompt
+                </div>
+                <p className="font-mono text-sm text-slate-800">
+                  "You are helping a marketing manager at an insurance company. Write a 150-word email to AAA members in California, promoting a new renters’ insurance product. The audience is 25–35, mostly renters in urban areas. Focus on peace of mind and simple claims."
+                </p>
+                <p className="text-xs text-blue-600 mt-4 font-medium">
+                  Result: Specific, targeted, and useful.
+                </p>
+              </Card>
+            </div>
+
+            <div className="bg-slate-100 p-6 rounded-xl border border-slate-200">
+              <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                <Zap className="w-5 h-5 text-yellow-500" /> Try this
+              </h3>
+              <p className="text-sm text-slate-600 mb-4">
+                Here are a couple of starter prompts you can copy right now:
+              </p>
+              <div className="space-y-4">
+                <PromptCard 
+                  label="The Clarifier"
+                  prompt="I’m a [role] working on [project]. Ask me 3 questions to clarify my goal, then suggest a plan." 
+                />
+                <PromptCard 
+                  label="The Blind Spot Check"
+                  prompt="You are my writing partner. I’ll paste context about my project and you help me spot missing information." 
+                />
+              </div>
+            </div>
+          </section>
+        );
+      case 2:
+        return (
+          <section id="requirements-and-format" className="mb-12 animate-fade-in">
+            <h2>Step 2: Tell it what "good" looks like</h2>
+            <p className="mb-6">
+              Models love structure. If you don't ask for a specific format, you'll get a wall of text. 
+              Be the boss and define the output shape.
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8 not-prose">
+              <div className="p-4 bg-white border border-slate-200 rounded-lg shadow-sm">
+                <div className="flex items-center gap-2 font-bold text-slate-900 mb-2">
+                  <ListChecks className="w-4 h-4 text-purple-600" /> Format
+                </div>
+                <p className="text-sm text-slate-600">Table, bullet points, email draft, JSON, FAQ list.</p>
+              </div>
+              <div className="p-4 bg-white border border-slate-200 rounded-lg shadow-sm">
+                <div className="flex items-center gap-2 font-bold text-slate-900 mb-2">
+                  <Target className="w-4 h-4 text-red-600" /> Length
+                </div>
+                <p className="text-sm text-slate-600">"Under 200 words", "1-page brief", "3 sentences max".</p>
+              </div>
+              <div className="p-4 bg-white border border-slate-200 rounded-lg shadow-sm">
+                <div className="flex items-center gap-2 font-bold text-slate-900 mb-2">
+                  <User className="w-4 h-4 text-blue-600" /> Tone
+                </div>
+                <p className="text-sm text-slate-600">"Clear and neutral", "Friendly but professional", "ELI5".</p>
+              </div>
+              <div className="p-4 bg-white border border-slate-200 rounded-lg shadow-sm">
+                <div className="flex items-center gap-2 font-bold text-slate-900 mb-2">
+                  <Target className="w-4 h-4 text-amber-600" /> Constraints
+                </div>
+                <p className="text-sm text-slate-600">"No confidential data", "Don't invent facts", "Ask if unsure".</p>
+              </div>
+            </div>
+
+            <h3 className="font-bold text-slate-900 mb-4">Example: The Structured Request</h3>
+            <PromptCard 
+              label="Internal Comms Prompt"
+              prompt={`You are an internal comms writer. Based on the notes below, write:
+1. A 3-bullet executive summary.
+2. A 150-word email for all staff.
+3. A table of risks with columns: Risk, Owner, Next Step.`}
+            />
+
+            <Callout variant="info" title="Pro Tip" className="mt-8">
+              If you’re going to copy the output into a slide or doc, tell the AI that upfront! 
+              <br/><em>"Format this as slide bullets"</em> or <em>"Use H2 headings for easy copying."</em>
+            </Callout>
+          </section>
+        );
+      case 3:
+        return (
+          <section id="examples-and-iteration" className="mb-12 animate-fade-in">
+            <h2>Step 3: Show, don’t just tell</h2>
+            <p className="mb-6">
+              The "E" in many frameworks stands for <strong>Examples</strong>. Giving the model an example of the input and desired output (few-shot prompting) helps it lock onto your style immediately.
+            </p>
+
+            <div className="mb-8">
+              <h3 className="font-bold text-slate-900 mb-4">The Secret Weapon: Iteration</h3>
+              <p className="text-slate-600 mb-4">
+                Your first prompt is almost never perfect. That's okay. Treat it like a conversation.
+              </p>
+              <Card className="p-6 bg-slate-50 border-slate-200">
+                <div className="flex items-start gap-4">
+                  <div className="p-2 bg-white rounded-full border border-slate-200 shadow-sm shrink-0">
+                    <Repeat className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-slate-900 mb-2">The Rewrite Loop</h4>
+                    <p className="text-sm text-slate-600 mb-3">
+                      Paste a rough paragraph you wrote. Then ask:
+                    </p>
+                    <div className="font-mono text-xs bg-white p-2 rounded border border-slate-200 text-slate-700">
+                      "Give me 3 rewrite options for this paragraph. 
+                      <br/>Option 1: More concise.
+                      <br/>Option 2: More persuasive.
+                      <br/>Option 3: Easier to read (8th grade level)."
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div>
+                <h3 className="font-bold text-slate-900 mb-2 flex items-center gap-2">
+                  <GitBranch className="w-5 h-5 text-purple-600" /> Branching
+                </h3>
+                <p className="text-sm text-slate-600">
+                  Don't be afraid to edit your prompt and re-run it to create "branches" of thought. 
+                  Compare how a slight change in tone or context changes the entire result.
+                </p>
+              </div>
+              <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-100">
+                <h3 className="font-bold text-emerald-900 mb-2">Checklist after every answer:</h3>
+                <ul className="space-y-2 text-sm text-emerald-800">
+                  <li>◻️ "What’s missing from this?"</li>
+                  <li>◻️ "What would I need to add before sharing this?"</li>
+                  <li>◻️ "Can you propose 2–3 stronger options?"</li>
+                </ul>
+              </div>
+            </div>
+          </section>
+        );
+      case 4:
+        return (
+          <section id="full-prompt" className="mb-12 animate-fade-in">
+            <h2>Putting It All Together</h2>
+            <p className="mb-6">
+              You don't need to memorize a complex acronym. Just remember this shape. 
+              Copy-paste this template into your notes app.
+            </p>
+
+            <div className="bg-slate-900 text-slate-200 p-6 rounded-xl font-mono text-sm shadow-2xl mb-8 overflow-x-auto">
+              <div className="text-slate-400 mb-2">// THE REUSABLE TEMPLATE</div>
+              <div className="space-y-2">
+                <div><span className="text-purple-400">Role:</span> [Optional Persona]</div>
+                <div><span className="text-blue-400">Task:</span> [What you want it to do]</div>
+                <div><span className="text-green-400">Context:</span> [Background info, Audience, Goal]</div>
+                <div><span className="text-amber-400">Requirements:</span> [Format, Length, Tone, Constraints]</div>
+                <div><span className="text-slate-500">Examples:</span> [Optional: "Here is a good example..."]</div>
+              </div>
+            </div>
+
+            <h3 className="font-bold text-slate-900 mb-4">Worked Example: Marketing Plan</h3>
+            <Card className="p-6 bg-white border-slate-200 mb-12">
+              <ul className="space-y-3 text-sm">
+                <li><strong className="text-purple-700">Role:</strong> Marketing Manager at AAA.</li>
+                <li><strong className="text-blue-700">Task:</strong> Plan a 3-email onboarding sequence.</li>
+                <li><strong className="text-green-700">Context:</strong> New roadside-assistance members in California, mostly first-time AAA users. They are anxious about using the app.</li>
+                <li><strong className="text-amber-700">Requirements:</strong> Output a table with columns: Email #, Subject Line, Core Goal, Key Message, CTA. Keep tone reassuring.</li>
+              </ul>
+            </Card>
+
+            <div className="bg-blue-50 p-6 rounded-xl border border-blue-100">
+              <h3 className="font-bold text-blue-900 mb-4 flex items-center gap-2">
+                <Lightbulb className="w-5 h-5" /> Reflection
+              </h3>
+              <ul className="space-y-3 text-sm text-blue-800">
+                <li className="flex gap-2">
+                   <ArrowRight className="w-4 h-4 mt-0.5" /> 
+                   Where in your current job could you try this today?
+                </li>
+                <li className="flex gap-2">
+                   <ArrowRight className="w-4 h-4 mt-0.5" /> 
+                   What’s one recurring task you could "hand off" to AI with a good prompt?
+                </li>
+                <li className="flex gap-2">
+                   <ArrowRight className="w-4 h-4 mt-0.5" /> 
+                   What’s one experiment you could run this week?
+                </li>
+              </ul>
+            </div>
+          </section>
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
     <ModuleLayout
@@ -269,7 +312,7 @@ export default function Page() {
 
       {/* Current Section Content */}
       <div className="min-h-[400px]">
-        {sectionContent[currentStep]}
+        {renderStepContent()}
       </div>
 
       {/* Navigation Buttons */}

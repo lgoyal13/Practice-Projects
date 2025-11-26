@@ -1,193 +1,580 @@
 import React, { useState } from 'react';
 import { ModuleLayout } from '../../../components/ModuleLayout';
-import { Card, Button, Badge } from '../../../components/ui';
+import { Card, Button, Badge, Callout } from '../../../components/ui';
 import { useRouter } from '../../../lib/routerContext';
-import { Globe, Layers, PenTool, MessageSquare, ArrowRight, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { Globe, Layers, PenTool, MessageSquare, ArrowRight, ArrowLeft, CheckCircle2, Search, FileText, Zap, BrainCircuit, Hammer, Target, BookOpen } from 'lucide-react';
+
+// Import Deep Dive Modules
+import ResearchPage from '../tool-research/page';
+import DocumentsPage from '../tool-documents/page';
+import BuilderPage from '../tool-builder/page';
+
+type ActiveView = 'overview' | 'research' | 'documents' | 'builder';
 
 export default function Page() {
   const { push } = useRouter();
+  const [activeView, setActiveView] = useState<ActiveView>('overview');
   const [currentStep, setCurrentStep] = useState(0);
+
+  // Interactive Quiz State
+  const [activeJobId, setActiveJobId] = useState<string | null>(null);
+  const [selectedJobOptions, setSelectedJobOptions] = useState<Record<string, string>>({});
+
+  // Steps array for navigation
+  const stepIds = ['intro', 'decision', 'categories', 'deep-dives'];
+  const totalSteps = stepIds.length;
+
+  const scrollToTop = () => {
+    if (typeof window !== 'undefined') window.scrollTo(0, 0);
+  };
+
+  const handleNextStep = () => {
+    setCurrentStep(prev => Math.min(prev + 1, totalSteps - 1));
+    scrollToTop();
+  };
+
+  const handlePrevStep = () => {
+    setCurrentStep(prev => Math.max(prev - 1, 0));
+    scrollToTop();
+  };
+
+  // If in a deep dive, render that component with a back button
+  if (activeView === 'research') {
+    return (
+      <div className="animate-fade-in">
+        <div className="bg-slate-50 border-b border-slate-200 p-4 sticky top-0 z-10">
+           <div className="max-w-6xl mx-auto">
+             <Button variant="ghost" onClick={() => setActiveView('overview')} className="text-slate-600 hover:text-blue-600 pl-0">
+               <ArrowLeft className="w-4 h-4 mr-2" /> Back to Tools Overview
+             </Button>
+           </div>
+        </div>
+        <ResearchPage />
+      </div>
+    );
+  }
+
+  if (activeView === 'documents') {
+    return (
+      <div className="animate-fade-in">
+        <div className="bg-slate-50 border-b border-slate-200 p-4 sticky top-0 z-10">
+           <div className="max-w-6xl mx-auto">
+             <Button variant="ghost" onClick={() => setActiveView('overview')} className="text-slate-600 hover:text-purple-600 pl-0">
+               <ArrowLeft className="w-4 h-4 mr-2" /> Back to Tools Overview
+             </Button>
+           </div>
+        </div>
+        <DocumentsPage />
+      </div>
+    );
+  }
+
+  if (activeView === 'builder') {
+    return (
+      <div className="animate-fade-in">
+         <div className="bg-slate-50 border-b border-slate-200 p-4 sticky top-0 z-10">
+           <div className="max-w-6xl mx-auto">
+             <Button variant="ghost" onClick={() => setActiveView('overview')} className="text-slate-600 hover:text-emerald-600 pl-0">
+               <ArrowLeft className="w-4 h-4 mr-2" /> Back to Tools Overview
+             </Button>
+           </div>
+        </div>
+        <BuilderPage />
+      </div>
+    );
+  }
+
+  // Quiz Data
+  const jobs = [
+    {
+      id: 'job1',
+      title: 'Job 1: Write, rewrite, or brainstorm',
+      description: 'e.g., "Draft an email," "Give me ideas," "Fix this grammar"',
+      correctTool: 'chat',
+      options: [
+        { id: 'chat', label: 'Gemini / ChatGPT / Claude (Chat Assistants)' },
+        { id: 'research', label: 'Perplexity / Gemini Deep Research (Research Tools)' },
+        { id: 'docs', label: 'NotebookLM / Notion AI (Your Docs Tools)' },
+        { id: 'builder', label: 'AI Studio / Custom Builders (Builders)' },
+      ],
+      successMessage: 'Correct! Use Chat Assistants when you have the facts in your head but need help articulating them.',
+      successPrompt: '"Draft a polite email to [Client] explaining the delay due to [Reason]. Keep it under 100 words."',
+      errorMessage: 'Not quite. While other tools can generate text, a standard Chat Assistant is fastest and most flexible for open-ended writing.',
+    },
+    {
+      id: 'job2',
+      title: 'Job 2: Up-to-date facts and citations',
+      description: 'e.g., "What did Competitor X launch?" "Latest regulations"',
+      correctTool: 'research',
+      options: [
+        { id: 'chat', label: 'Gemini / ChatGPT / Claude (Chat Assistants)' },
+        { id: 'research', label: 'Perplexity / Gemini Deep Research (Research Tools)' },
+        { id: 'docs', label: 'NotebookLM / Notion AI (Your Docs Tools)' },
+        { id: 'builder', label: 'AI Studio / Custom Builders (Builders)' },
+      ],
+      successMessage: 'Correct! Research Tools access the live web and provide citations, so you can verify facts.',
+      successPrompt: '"What are the latest regulatory changes for [Industry] in [Region] from the last 6 months? Cite sources."',
+      errorMessage: 'Be careful! Standard chat assistants might hallucinate facts or have outdated knowledge. Research tools are safer for facts.',
+      mentalModel: 'Tip: Fast models (Gemini Flash) give quick overviews. For high-stakes research, switch to reasoning/Deep Research modes (Gemini Pro, Perplexity Deep Research) for slower, evidence-backed answers.',
+    },
+    {
+      id: 'job3',
+      title: 'Job 3: Understanding your own PDFs/Docs',
+      description: 'e.g., "Summarize these 50 pages," "Compare these contracts"',
+      correctTool: 'docs',
+      options: [
+        { id: 'chat', label: 'Gemini / ChatGPT / Claude (Chat Assistants)' },
+        { id: 'research', label: 'Perplexity / Gemini Deep Research (Research Tools)' },
+        { id: 'docs', label: 'NotebookLM / Notion AI (Your Docs Tools)' },
+        { id: 'builder', label: 'AI Studio / Custom Builders (Builders)' },
+      ],
+      successMessage: 'Correct! "Your Docs" tools create a private knowledge base from your uploaded files.',
+      successPrompt: '"Based on these 5 PDFs, what are the top 3 risks mentioned? Cite the page numbers."',
+      errorMessage: 'Standard chat windows have limits on how much text you can paste. "Your Docs" tools are built for large document sets.',
+    },
+    {
+      id: 'job4',
+      title: 'Job 4: Reusable workflows / Mini-apps',
+      description: 'e.g., "I re-type this same complex prompt every week"',
+      correctTool: 'builder',
+      options: [
+        { id: 'chat', label: 'Gemini / ChatGPT / Claude (Chat Assistants)' },
+        { id: 'research', label: 'Perplexity / Gemini Deep Research (Research Tools)' },
+        { id: 'docs', label: 'NotebookLM / Notion AI (Your Docs Tools)' },
+        { id: 'builder', label: 'AI Studio / Custom Builders (Builders)' },
+      ],
+      successMessage: 'Correct! Builders let you freeze a prompt into a reliable tool that you or your team can use repeatedly.',
+      successPrompt: 'System Instruction: "You are an expert editor. Always rewrite input to be concise and professional."',
+      errorMessage: 'Chat is great for one-offs, but for repeatable tasks, a Builder tool ensures consistency.',
+    },
+  ];
+
+  const handleQuizSelection = (jobId: string, optionId: string) => {
+    setSelectedJobOptions(prev => ({ ...prev, [jobId]: optionId }));
+  };
+
+  // Step Contents
+  const sectionContent = [
+    // Step 1: INTRO
+    {
+      id: 'intro',
+      node: (
+        <section id="intro" className="mb-16 animate-fade-in">
+          <h2>You Don’t Have “An AI.” You Have a Toolkit.</h2>
+          <p>
+            Most people just open a chat window and hope for magic. But using a generic chatbot for everything is like trying to build a house using only a hammer.
+          </p>
+          <p>
+            In reality, AI tools fall into a few specific jobs:
+          </p>
+          <ul className="list-disc pl-5 space-y-2 text-slate-700 mb-6">
+            <li><strong>Organizing your own material</strong> (docs, PDFs, decks, notes)</li>
+            <li><strong>Helping with drafting</strong> (emails, briefs, slides)</li>
+            <li><strong>Doing grounded web research</strong> (facts with citations)</li>
+            <li><strong>Building reusable workflows</strong> (mini-apps, assistants)</li>
+          </ul>
+          <p className="mb-8">
+             This module is your map. The deep dives show you how to actually drive each tool.
+          </p>
+
+          {/* LOGO PALETTE CARD */}
+          <Card className="bg-slate-50 border-slate-200 p-6 mb-8">
+             <h3 className="text-lg font-bold text-slate-900 mb-4">You’ll Meet These Along the Way</h3>
+             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div>
+                   <div className="text-xs font-bold uppercase text-slate-500 mb-2 tracking-wider">Chat & Drafting</div>
+                   <div className="flex flex-wrap gap-2">
+                      <Badge variant="neutral">Gemini</Badge>
+                      <Badge variant="neutral">ChatGPT</Badge>
+                      <Badge variant="neutral">Claude</Badge>
+                   </div>
+                </div>
+                <div>
+                   <div className="text-xs font-bold uppercase text-slate-500 mb-2 tracking-wider">Research & Web</div>
+                   <div className="flex flex-wrap gap-2">
+                      <Badge variant="neutral">Perplexity</Badge>
+                      <Badge variant="neutral">Gemini Deep Research</Badge>
+                   </div>
+                </div>
+                <div>
+                   <div className="text-xs font-bold uppercase text-slate-500 mb-2 tracking-wider">Your Docs</div>
+                   <div className="flex flex-wrap gap-2">
+                      <Badge variant="neutral">NotebookLM</Badge>
+                      <Badge variant="neutral">Notion AI</Badge>
+                   </div>
+                </div>
+                <div>
+                   <div className="text-xs font-bold uppercase text-slate-500 mb-2 tracking-wider">Builders</div>
+                   <div className="flex flex-wrap gap-2">
+                      <Badge variant="neutral">AI Studio</Badge>
+                      <Badge variant="neutral">Gems / GPTs</Badge>
+                   </div>
+                </div>
+             </div>
+          </Card>
+
+          {/* JUMP PANEL */}
+          <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+             <div className="flex items-center gap-2 mb-4">
+                <Zap className="w-5 h-5 text-amber-500 fill-amber-500" />
+                <h3 className="text-lg font-bold text-slate-900 m-0">Already know the basics? Jump straight to a deep dive.</h3>
+             </div>
+             <p className="text-sm text-slate-600 mb-6 max-w-3xl">
+                If you’re here with a specific job in mind, you can skip the tour and dive right into the tool you actually care about. You can always come back to this overview later.
+             </p>
+             
+             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 not-prose">
+                <Card 
+                   className="p-4 hover:border-blue-400 cursor-pointer group flex flex-col h-full bg-slate-50"
+                   onClick={() => setActiveView('research')}
+                >
+                   <div className="flex items-center gap-2 font-bold text-blue-700 mb-2">
+                      <Globe className="w-4 h-4" /> Research & Web
+                   </div>
+                   <p className="text-xs text-slate-500 mb-2 font-semibold">For: Strategy, product, competitive intel.</p>
+                   <p className="text-xs text-slate-600 leading-relaxed flex-1 mb-3">
+                      Get cited, factual answers from the live web.
+                   </p>
+                   <div className="flex gap-1 flex-wrap mb-3">
+                     <span className="text-[10px] px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded">Perplexity</span>
+                     <span className="text-[10px] px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded">Gemini Deep Research</span>
+                   </div>
+                   <div className="mt-auto flex items-center text-xs font-bold text-blue-600 group-hover:underline">
+                      Start Deep Dive <ArrowRight className="w-3 h-3 ml-1" />
+                   </div>
+                </Card>
+
+                <Card 
+                   className="p-4 hover:border-purple-400 cursor-pointer group flex flex-col h-full bg-slate-50"
+                   onClick={() => setActiveView('documents')}
+                >
+                   <div className="flex items-center gap-2 font-bold text-purple-700 mb-2">
+                      <Layers className="w-4 h-4" /> Your Docs
+                   </div>
+                   <p className="text-xs text-slate-500 mb-2 font-semibold">For: Drowning in PDFs, decks, notes.</p>
+                   <p className="text-xs text-slate-600 leading-relaxed flex-1 mb-3">
+                      Turn files into a private research room.
+                   </p>
+                   <div className="flex gap-1 flex-wrap mb-3">
+                     <span className="text-[10px] px-1.5 py-0.5 bg-purple-100 text-purple-700 rounded">NotebookLM</span>
+                     <span className="text-[10px] px-1.5 py-0.5 bg-purple-100 text-purple-700 rounded">Notion AI</span>
+                   </div>
+                   <div className="mt-auto flex items-center text-xs font-bold text-purple-600 group-hover:underline">
+                      Start Deep Dive <ArrowRight className="w-3 h-3 ml-1" />
+                   </div>
+                </Card>
+
+                <Card 
+                   className="p-4 hover:border-emerald-400 cursor-pointer group flex flex-col h-full bg-slate-50"
+                   onClick={() => setActiveView('builder')}
+                >
+                   <div className="flex items-center gap-2 font-bold text-emerald-700 mb-2">
+                      <PenTool className="w-4 h-4" /> Builder's Lab
+                      <Badge variant="neutral" className="ml-auto text-[10px] py-0 px-1.5 h-5">Adv</Badge>
+                   </div>
+                   <p className="text-xs text-slate-500 mb-2 font-semibold">For: Power users & automation.</p>
+                   <p className="text-xs text-slate-600 leading-relaxed flex-1 mb-3">
+                      Turn prompts into reusable workflows.
+                   </p>
+                   <div className="flex gap-1 flex-wrap mb-3">
+                     <span className="text-[10px] px-1.5 py-0.5 bg-emerald-100 text-emerald-700 rounded">AI Studio</span>
+                     <span className="text-[10px] px-1.5 py-0.5 bg-emerald-100 text-emerald-700 rounded">Gems / GPTs</span>
+                   </div>
+                   <div className="mt-auto flex items-center text-xs font-bold text-emerald-600 group-hover:underline">
+                      Start Deep Dive <ArrowRight className="w-3 h-3 ml-1" />
+                   </div>
+                </Card>
+             </div>
+          </div>
+        </section>
+      )
+    },
+    // Step 2: INTERACTIVE QUIZ
+    {
+      id: 'decision',
+      node: (
+        <section id="decision" className="mb-16 animate-fade-in">
+          <h2>Quick Decision Guide</h2>
+          <p className="mb-6">
+             Not sure which tool to open? Pick a job below to see the right tool for the task.
+          </p>
+
+          <div className="space-y-4 not-prose">
+            {jobs.map((job) => {
+              const isExpanded = activeJobId === job.id;
+              const selectedOption = selectedJobOptions[job.id];
+              const isCorrect = selectedOption === job.correctTool;
+              const isIncorrect = selectedOption && !isCorrect;
+
+              return (
+                <Card key={job.id} className={`transition-all ${isExpanded ? 'ring-2 ring-blue-100 shadow-md' : 'hover:bg-slate-50'}`}>
+                  <div 
+                    className="p-4 flex items-center justify-between cursor-pointer"
+                    onClick={() => setActiveJobId(isExpanded ? null : job.id)}
+                  >
+                    <div>
+                      <h3 className={`font-bold ${isExpanded ? 'text-blue-700' : 'text-slate-900'}`}>{job.title}</h3>
+                      <p className="text-sm text-slate-500">{job.description}</p>
+                    </div>
+                    <div className={`transform transition-transform ${isExpanded ? 'rotate-90' : ''}`}>
+                      <ArrowRight className="w-5 h-5 text-slate-400" />
+                    </div>
+                  </div>
+
+                  {isExpanded && (
+                    <div className="px-4 pb-6 pt-2 border-t border-slate-100 animate-fade-in">
+                      <p className="text-sm font-semibold text-slate-700 mb-3">Which tool group fits best?</p>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+                        {job.options.map((option) => (
+                          <button
+                            key={option.id}
+                            onClick={() => handleQuizSelection(job.id, option.id)}
+                            className={`
+                              text-left px-4 py-3 rounded-lg text-sm font-medium border transition-all
+                              ${selectedOption === option.id 
+                                ? (option.id === job.correctTool ? 'bg-green-50 border-green-500 text-green-800' : 'bg-red-50 border-red-500 text-red-800')
+                                : 'bg-white border-slate-200 text-slate-600 hover:border-blue-300 hover:text-blue-600'}
+                            `}
+                          >
+                            {option.label}
+                          </button>
+                        ))}
+                      </div>
+
+                      {selectedOption && isCorrect && (
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-4 animate-fade-in">
+                          <div className="flex gap-2 items-start mb-2">
+                             <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
+                             <p className="text-sm text-green-900 font-bold">{job.successMessage}</p>
+                          </div>
+                          {job.mentalModel && (
+                            <p className="text-xs text-slate-600 mb-3 ml-7">
+                              <strong>Mental Model:</strong> {job.mentalModel}
+                            </p>
+                          )}
+                          <div className="ml-7 mt-2">
+                             <p className="text-xs font-bold text-slate-500 uppercase mb-1">Example Prompt:</p>
+                             <div className="bg-white p-2 rounded border border-green-100 font-mono text-xs text-slate-600">
+                               {job.successPrompt}
+                             </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {selectedOption && isIncorrect && (
+                        <div className="bg-red-50 border border-red-200 rounded-lg p-4 animate-fade-in flex gap-2 items-start">
+                           <Target className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+                           <p className="text-sm text-red-900">{job.errorMessage} Try again!</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </Card>
+              );
+            })}
+          </div>
+        </section>
+      )
+    },
+    // Step 3: CATEGORIES
+    {
+      id: 'categories',
+      node: (
+        <section id="categories" className="mb-16 animate-fade-in">
+          <h2>Tool Categories</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 not-prose">
+            
+            <Card className="p-6 border-t-4 border-t-yellow-500">
+              <div className="flex items-center gap-2 mb-3">
+                <MessageSquare className="w-6 h-6 text-yellow-600" />
+                <h3 className="font-bold text-lg text-slate-900">Chat Assistants</h3>
+              </div>
+              <div className="flex gap-2 mb-4">
+                 <Badge variant="neutral" className="text-[10px]">Gemini</Badge>
+                 <Badge variant="neutral" className="text-[10px]">ChatGPT</Badge>
+                 <Badge variant="neutral" className="text-[10px]">Claude</Badge>
+              </div>
+              <p className="text-sm text-slate-600 mb-2">
+                 <strong>Best for:</strong> Drafting, rephrasing, brainstorming, and explaining concepts.
+              </p>
+              <p className="text-sm text-slate-600 mb-2">
+                 <strong>Signature move:</strong> "Turn this blank page into a first draft."
+              </p>
+              <p className="text-sm text-slate-500 mb-4 italic">
+                 <strong>Watch out for:</strong> Hallucinations (making up facts). Always check their work.
+              </p>
+              <Button variant="ghost" size="sm" className="w-full text-slate-500 text-xs" onClick={() => push('/reference/resources')}>
+                 <BookOpen className="w-3 h-3 mr-2"/> View Resource Library
+              </Button>
+            </Card>
+
+            <Card className="p-6 border-t-4 border-t-blue-500">
+              <div className="flex items-center gap-2 mb-3">
+                <Globe className="w-6 h-6 text-blue-600" />
+                <h3 className="font-bold text-lg text-slate-900">Research Tools</h3>
+              </div>
+              <div className="flex gap-2 mb-4">
+                 <Badge variant="neutral" className="text-[10px]">Perplexity</Badge>
+                 <Badge variant="neutral" className="text-[10px]">Deep Research</Badge>
+              </div>
+              <p className="text-sm text-slate-600 mb-2">
+                 <strong>Best for:</strong> Finding facts, citations, market intelligence, and news.
+              </p>
+              <p className="text-sm text-slate-600 mb-2">
+                 <strong>Signature move:</strong> "Write a report on [Topic] with 5 citations."
+              </p>
+              <p className="text-sm text-slate-500 mb-4 italic">
+                 <strong>Watch out for:</strong> Overkill on simple questions. Use chat for simple stuff.
+              </p>
+              <Button variant="ghost" size="sm" className="w-full text-slate-500 text-xs" onClick={() => push('/reference/resources')}>
+                 <BookOpen className="w-3 h-3 mr-2"/> View Resource Library
+              </Button>
+            </Card>
+
+            <Card className="p-6 border-t-4 border-t-purple-500">
+              <div className="flex items-center gap-2 mb-3">
+                <Layers className="w-6 h-6 text-purple-600" />
+                <h3 className="font-bold text-lg text-slate-900">"Your Docs" Tools</h3>
+              </div>
+              <div className="flex gap-2 mb-4">
+                 <Badge variant="neutral" className="text-[10px]">NotebookLM</Badge>
+                 <Badge variant="neutral" className="text-[10px]">Notion AI</Badge>
+              </div>
+              <p className="text-sm text-slate-600 mb-2">
+                 <strong>Best for:</strong> Summarizing, comparing, and querying your own files.
+              </p>
+              <p className="text-sm text-slate-600 mb-2">
+                 <strong>Signature move:</strong> "Turn these 50 PDFs into a briefing doc."
+              </p>
+              <p className="text-sm text-slate-500 mb-4 italic">
+                 <strong>Watch out for:</strong> Privacy settings. Ensure the tool is approved for internal data.
+              </p>
+              <Button variant="ghost" size="sm" className="w-full text-slate-500 text-xs" onClick={() => push('/reference/resources')}>
+                 <BookOpen className="w-3 h-3 mr-2"/> View Resource Library
+              </Button>
+            </Card>
+
+            <Card className="p-6 border-t-4 border-t-emerald-500">
+              <div className="flex items-center gap-2 mb-3">
+                <PenTool className="w-6 h-6 text-emerald-600" />
+                <h3 className="font-bold text-lg text-slate-900">Builder Tools</h3>
+              </div>
+              <div className="flex gap-2 mb-4">
+                 <Badge variant="neutral" className="text-[10px]">AI Studio</Badge>
+                 <Badge variant="neutral" className="text-[10px]">Gems / GPTs</Badge>
+              </div>
+              <p className="text-sm text-slate-600 mb-2">
+                 <strong>Best for:</strong> Prototyping reusable workflows and mini-apps.
+              </p>
+              <p className="text-sm text-slate-600 mb-2">
+                 <strong>Signature move:</strong> "Freeze this great prompt into a button for the team."
+              </p>
+              <p className="text-sm text-slate-500 mb-4 italic">
+                 <strong>Watch out for:</strong> Complexity. Don't build a tool if a simple chat will do.
+              </p>
+              <Button variant="ghost" size="sm" className="w-full text-slate-500 text-xs" onClick={() => push('/reference/resources')}>
+                 <BookOpen className="w-3 h-3 mr-2"/> View Resource Library
+              </Button>
+            </Card>
+          </div>
+        </section>
+      )
+    },
+    // Step 4: DEEP DIVES
+    {
+      id: 'deep-dives',
+      node: (
+        <div className="animate-fade-in">
+          <section id="deep-dives" className="mb-16">
+            <h2>Deep Dives</h2>
+            <p className="mb-6">Ready to master a specific tool? Click below to start the interactive module.</p>
+            
+            <div className="space-y-4 not-prose">
+              <Card 
+                className="p-4 hover:border-blue-300 cursor-pointer group flex items-center justify-between"
+                onClick={() => setActiveView('research')}
+              >
+                <div className="flex items-center gap-4">
+                  <div className="p-2 bg-blue-100 text-blue-600 rounded">
+                    <Globe className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-slate-900">Research & Web Deep Dive</h3>
+                    <p className="text-sm text-slate-500">How to get cited, factual answers from the web.</p>
+                  </div>
+                </div>
+                <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-blue-500" />
+              </Card>
+
+              <Card 
+                className="p-4 hover:border-purple-300 cursor-pointer group flex items-center justify-between"
+                onClick={() => setActiveView('documents')}
+              >
+                <div className="flex items-center gap-4">
+                  <div className="p-2 bg-purple-100 text-purple-600 rounded">
+                    <Layers className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-slate-900">"Your Docs" Deep Dive</h3>
+                    <p className="text-sm text-slate-500">How to chat with internal files securely.</p>
+                  </div>
+                </div>
+                <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-purple-500" />
+              </Card>
+
+              <Card 
+                className="p-4 hover:border-emerald-300 cursor-pointer group flex items-center justify-between bg-slate-50"
+                onClick={() => setActiveView('builder')}
+              >
+                <div className="flex items-center gap-4">
+                  <div className="p-2 bg-emerald-100 text-emerald-600 rounded">
+                    <PenTool className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-bold text-slate-900">Builder's Lab</h3>
+                      <Badge variant="neutral">Advanced</Badge>
+                    </div>
+                    <p className="text-sm text-slate-500">Create your own reusable AI assistants.</p>
+                  </div>
+                </div>
+                <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-emerald-500" />
+              </Card>
+            </div>
+          </section>
+
+          {/* Advanced Callout */}
+          <section className="mb-12">
+             <Callout variant="info" title="What about Agents & Automation?">
+                <p className="mt-1">
+                   Building multi-step autonomous agents (e.g., "Read email → extract data → update spreadsheet") is a next-level skill. 
+                   We cover this in the separate <strong>Advanced Workflows</strong> module. Master these core tools first!
+                </p>
+             </Callout>
+          </section>
+        </div>
+      )
+    }
+  ];
 
   const sections = [
     { id: 'intro', title: 'The Right Tool for the Job' },
+    { id: 'decision', title: 'Quick Decision Guide' },
     { id: 'categories', title: 'Tool Categories' },
     { id: 'deep-dives', title: 'Deep Dives' },
-  ];
-
-  const totalSteps = sections.length;
-
-  const handleNext = () => {
-    setCurrentStep(prev => Math.min(totalSteps - 1, prev + 1));
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handlePrev = () => {
-    setCurrentStep(prev => Math.max(0, prev - 1));
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const sectionContent = [
-    // SECTION 1: INTRO
-    (
-      <section key="intro" id="intro" className="mb-12 animate-fade-in">
-        <h2>Stop Using a Hammer for Everything</h2>
-        <p>
-          We often see people trying to use a standard Chat Assistant (like ChatGPT) for tasks it isn't good at—like 
-          browsing live news or analyzing 50-page PDFs.
-        </p>
-        <p>
-          Just like you wouldn't use Excel to write a letter, you shouldn't use a text generator to do deep research. 
-          Understanding the <strong>Core Categories</strong> of AI tools will double your efficiency.
-        </p>
-      </section>
-    ),
-
-    // SECTION 2: CATEGORIES
-    (
-      <section key="categories" id="categories" className="mb-12 animate-fade-in">
-        <h2>The 4 Main Tool Types</h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 not-prose">
-          {/* Chat Assistants */}
-          <Card className="p-6 border-t-4 border-t-yellow-500">
-            <div className="flex items-center gap-2 mb-3">
-              <MessageSquare className="w-6 h-6 text-yellow-600" />
-              <h3 className="font-bold text-lg text-slate-900">Chat Assistants</h3>
-            </div>
-            <p className="text-sm text-slate-600 mb-4">
-              <strong>Best for:</strong> Writing, brainstorming, rewriting, and coding help.
-            </p>
-            <ul className="text-xs text-slate-500 list-disc pl-4 space-y-1">
-              <li>Drafting emails</li>
-              <li>Summarizing short text</li>
-              <li>Rephrasing tone</li>
-            </ul>
-          </Card>
-
-          {/* Research Tools */}
-          <Card className="p-6 border-t-4 border-t-blue-500">
-            <div className="flex items-center gap-2 mb-3">
-              <Globe className="w-6 h-6 text-blue-600" />
-              <h3 className="font-bold text-lg text-slate-900">Research Tools</h3>
-            </div>
-            <p className="text-sm text-slate-600 mb-4">
-              <strong>Best for:</strong> Finding facts, citations, and live web info.
-            </p>
-            <ul className="text-xs text-slate-500 list-disc pl-4 space-y-1">
-              <li>Market research</li>
-              <li>Competitor news</li>
-              <li>Fact-checking</li>
-            </ul>
-          </Card>
-
-          {/* Your Docs Tools */}
-          <Card className="p-6 border-t-4 border-t-purple-500">
-            <div className="flex items-center gap-2 mb-3">
-              <Layers className="w-6 h-6 text-purple-600" />
-              <h3 className="font-bold text-lg text-slate-900">"Your Docs" Tools</h3>
-            </div>
-            <p className="text-sm text-slate-600 mb-4">
-              <strong>Best for:</strong> Analyzing YOUR uploaded files without hallucinating.
-            </p>
-            <ul className="text-xs text-slate-500 list-disc pl-4 space-y-1">
-              <li>Summarizing 50 PDFs</li>
-              <li>Project onboarding</li>
-              <li>Contract review</li>
-            </ul>
-          </Card>
-
-          {/* Builder Tools */}
-          <Card className="p-6 border-t-4 border-t-emerald-500">
-            <div className="flex items-center gap-2 mb-3">
-              <PenTool className="w-6 h-6 text-emerald-600" />
-              <h3 className="font-bold text-lg text-slate-900">Builder Tools</h3>
-            </div>
-            <p className="text-sm text-slate-600 mb-4">
-              <strong>Best for:</strong> Prototyping reusable tools and templates.
-            </p>
-            <ul className="text-xs text-slate-500 list-disc pl-4 space-y-1">
-              <li>Creating "The Email Bot"</li>
-              <li>Testing system prompts</li>
-              <li>Advanced workflows</li>
-            </ul>
-          </Card>
-        </div>
-      </section>
-    ),
-
-    // SECTION 3: DEEP DIVES
-    (
-      <section key="deep-dives" id="deep-dives" className="mb-12 animate-fade-in">
-        <h2>Explore Specific Tools</h2>
-        <p className="mb-6">Choose a path to learn more.</p>
-        
-        <div className="space-y-4 not-prose">
-          <Card 
-            className="p-4 hover:border-blue-300 cursor-pointer group flex items-center justify-between"
-            onClick={() => push('/modules/tool-research')}
-          >
-            <div className="flex items-center gap-4">
-              <div className="p-2 bg-blue-100 text-blue-600 rounded">
-                <Globe className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="font-bold text-slate-900">Research & Web Deep Dive</h3>
-                <p className="text-sm text-slate-500">How to get cited, factual answers from the web.</p>
-              </div>
-            </div>
-            <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-blue-500" />
-          </Card>
-
-          <Card 
-            className="p-4 hover:border-purple-300 cursor-pointer group flex items-center justify-between"
-            onClick={() => push('/modules/tool-documents')}
-          >
-            <div className="flex items-center gap-4">
-              <div className="p-2 bg-purple-100 text-purple-600 rounded">
-                <Layers className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="font-bold text-slate-900">"Your Docs" Deep Dive</h3>
-                <p className="text-sm text-slate-500">How to chat with internal files securely.</p>
-              </div>
-            </div>
-            <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-purple-500" />
-          </Card>
-
-          <Card 
-            className="p-4 hover:border-emerald-300 cursor-pointer group flex items-center justify-between bg-slate-50"
-            onClick={() => push('/modules/tool-builder')}
-          >
-            <div className="flex items-center gap-4">
-              <div className="p-2 bg-emerald-100 text-emerald-600 rounded">
-                <PenTool className="w-6 h-6" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="font-bold text-slate-900">Builder's Lab</h3>
-                  <Badge variant="neutral">Advanced</Badge>
-                </div>
-                <p className="text-sm text-slate-500">Create your own reusable AI assistants.</p>
-              </div>
-            </div>
-            <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-emerald-500" />
-          </Card>
-        </div>
-      </section>
-    )
   ];
 
   return (
     <ModuleLayout
       title="AI Tools & Research"
-      description="Don't just use a chatbot for everything. Learn to pick the right specialized AI tool for research, document analysis, and prototyping."
+      description="A quick tour of the AI toolbox: chat assistants, research engines, your-docs tools, and builders."
       duration="10 mins"
       audience="All Employees"
       sections={sections}
       nextModulePath="/modules/tool-research"
     >
       {/* Progress Bar */}
-      <div className="mb-10">
+      <div className="mb-8 not-prose">
         <div className="flex justify-between text-sm font-medium text-slate-500 mb-2">
           <span>Step {currentStep + 1} of {totalSteps}</span>
           <span>{Math.round(((currentStep + 1) / totalSteps) * 100)}%</span>
@@ -200,31 +587,33 @@ export default function Page() {
         </div>
       </div>
 
-      {/* Current Section Content */}
+      {/* ACTIVE STEP CONTENT */}
       <div className="min-h-[400px]">
-        {sectionContent[currentStep]}
+        {sectionContent[currentStep].node}
       </div>
 
-      {/* Navigation Buttons */}
-      <div className="flex justify-between mt-12 pt-8 border-t border-slate-200">
+      {/* NAVIGATION BUTTONS */}
+      <div className="flex justify-between mt-8 pt-6 border-t border-slate-200 not-prose">
         <Button 
-          variant="secondary" 
-          onClick={handlePrev} 
+          variant="outline" 
+          onClick={handlePrevStep} 
           disabled={currentStep === 0}
+          className="gap-2"
         >
-          <ArrowLeft className="w-4 h-4 mr-2" /> Previous
+          <ArrowLeft className="w-4 h-4" /> Previous
         </Button>
 
         {currentStep < totalSteps - 1 ? (
-          <Button onClick={handleNext}>
-            Next <ArrowRight className="w-4 h-4 ml-2" />
+          <Button onClick={handleNextStep} className="gap-2">
+            Next <ArrowRight className="w-4 h-4" />
           </Button>
         ) : (
-          <Button variant="outline" disabled className="opacity-75 cursor-not-allowed">
-            Module Complete <CheckCircle2 className="w-4 h-4 ml-2" />
+          <Button variant="outline" disabled className="opacity-75 cursor-not-allowed gap-2">
+            Module Overview Complete <CheckCircle2 className="w-4 h-4" />
           </Button>
         )}
       </div>
+
     </ModuleLayout>
   );
 }
